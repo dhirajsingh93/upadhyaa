@@ -4,6 +4,13 @@
  * polymer choices, and custom tooling parameters.
  */
 
+import bushImage from '../assets/images/a.jpg';
+import profileImage from '../assets/images/p.jpg';
+import moldedImage from '../assets/images/piece.jpeg';
+import sealKitImage from '../assets/images/q.jpg';
+import oilSealImage from '../assets/images/r.jpg';
+import gasketImage from '../assets/images/s.jpg';
+
 export const productCategories = [
   { id: "all", name: "All Components", count: 12 },
   { id: "rubber-bush", name: "Rubber Bush & Industrial Parts", count: 2 },
@@ -20,7 +27,7 @@ export const products = [
     name: "Heavy-Duty Suspension & Anti-Vibration Rubber Bush",
     category: "rubber-bush",
     categoryName: "Rubber Bush & Industrial Parts",
-    image: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/a.jpg",
+    image: bushImage,
     shortDesc: "High-damping bonded rubber-to-metal and solid elastomeric bushings designed for automotive chassis, suspension linkages, and industrial machinery.",
     description: "Engineered specifically to isolate mechanical vibrations, absorb dynamic torsional shocks, and eliminate metal-to-metal friction. Formulated using premium Natural Rubber (NR) and high-grade Chloroprene (CR) blends with high tensile bonding agents for severe cyclic fatigue resistance.",
     polymerOptions: ["Natural Rubber (NR)", "Chloroprene / Neoprene (CR)", "Nitrile (NBR)", "EPDM"],
@@ -42,7 +49,7 @@ export const products = [
     name: "Precision Cylindrical Rubber Bushings & Dampers",
     category: "rubber-bush",
     categoryName: "Rubber Bush & Industrial Parts",
-    image: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/a.jpg",
+    image: bushImage,
     shortDesc: "Precision cylindrical rubber bushes for rotating shafts, control arms, and pneumatic pump mountings.",
     description: "Designed for axial, radial, and torsional compliance in medium-to-heavy industrial assemblies. In-house compounded to prevent premature hardening or cracking under continuous vibration.",
     polymerOptions: ["Nitrile (NBR)", "Natural Rubber (NR)", "Polyurethane / EPDM"],
@@ -63,7 +70,7 @@ export const products = [
     name: "EPDM Continuous Rubber Extruded Profiles & Weatherstrips",
     category: "extruded-profiles",
     categoryName: "Rubber Extruded Profiles",
-    image: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/p.jpg",
+    image: profileImage,
     shortDesc: "Solid and co-extruded sponge EPDM rubber profiles for industrial enclosures, automotive door seals, and architectural glazing.",
     description: "Continuously vulcanized rubber profiles manufactured in D-section, P-section, U-channel, and hollow bulb configurations. Engineered with 100% virgin EPDM for unmatched ozone, UV sunlight, and atmospheric weather resistance.",
     polymerOptions: ["EPDM (Dense & Sponge)", "Silicone Elastomer", "Neoprene (CR)", "Nitrile (NBR)"],
@@ -85,7 +92,7 @@ export const products = [
     name: "Industrial Edge Protection U-Channels & Rubber Beading",
     category: "extruded-profiles",
     categoryName: "Rubber Extruded Profiles",
-    image: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/p.jpg",
+    image: profileImage,
     shortDesc: "Protective edge beadings and grip-lock extruded strips for sheet metal borders, glass panels, and equipment shrouds.",
     description: "Durable elastomeric edge trim designed to slip over raw sheet metal borders, eliminating sharp edges while providing acoustic damping and dust seals.",
     polymerOptions: ["EPDM Rubber", "Chloroprene (CR)", "Flexible PVC / Nitrile Blend"],
@@ -106,7 +113,7 @@ export const products = [
     name: "Custom Precision Molded Rubber Components & Boots",
     category: "custom-molded",
     categoryName: "Custom Molded Components",
-    image: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/piece.jpeg",
+    image: moldedImage,
     shortDesc: "Engineered multi-cavity compression and transfer moulded rubber components tailored to customer 2D/3D CAD specifications.",
     description: "From complex convoluted bellows and dust boots to custom shock isolators, diaphragms, and rubber-to-metal bonded dampers. Manufactured in our high-tonnage hydraulic presses with precision-controlled temperature and cure cycles.",
     polymerOptions: ["NBR (Nitrile)", "EPDM", "Neoprene", "Silicone (Food / Industrial Grade)", "Fluoroelastomer (FKM / Viton)"],
@@ -128,7 +135,7 @@ export const products = [
     name: "Heavy Machinery Anti-Vibration Mounts & Bumpers",
     category: "custom-molded",
     categoryName: "Custom Molded Components",
-    image: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/piece.jpeg",
+    image: moldedImage,
     shortDesc: "Compression-moulded rubber buffers, conical stops, and stud-type vibration dampers for heavy industrial plants.",
     description: "Engineered to withstand heavy compression loads, absorbing kinetic energy and preventing structural resonance in vibrating industrial equipment.",
     polymerOptions: ["Natural Rubber (High Elasticity)", "Nitrile (Oil Resistant)", "Neoprene"],
@@ -149,7 +156,7 @@ export const products = [
     name: "Precision Seal & O-Ring Kits (Standard & Custom)",
     category: "seal-o-ring-kits",
     categoryName: "Seal & O-Ring Kits",
-    image: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/q.jpg",
+    image: sealKitImage,
     shortDesc: "Complete industrial O-Ring assortments and custom sealing kits conforming to AS568, BS 1806, and metric DIN 3771 standards.",
     description: "Moulded from high-grade elastomeric compounds to provide leak-free static and dynamic sealing for hydraulic cylinders, pneumatic valves, fuel systems, and plumbing fixtures. Packaged in organized, clearly labeled industrial kit boxes.",
     polymerOptions: ["NBR (70 / 90 Shore A)", "EPDM (Steam & Brake Fluid)", "FKM / Viton (High Temp & Acid)", "Silicone (Food / Medical Grade)"],
@@ -171,7 +178,7 @@ export const products = [
     name: "X-Ring / Quad-Ring Low-Friction Dynamic Seals",
     category: "seal-o-ring-kits",
     categoryName: "Seal & O-Ring Kits",
-    image: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/q.jpg",
+    image: sealKitImage,
     shortDesc: "Four-lobed elastomeric X-rings for reciprocating pistons and rotating shafts requiring ultra-low breakaway friction.",
     description: "Double sealing surface provides twice the sealing efficiency of standard O-rings while resisting spiral failure in reciprocating hydraulic applications.",
     polymerOptions: ["Nitrile (NBR)", "Fluoroelastomer (Viton)", "EPDM"],
@@ -192,7 +199,7 @@ export const products = [
     name: "Heavy-Duty Rotary Shaft Oil & Packing Seals",
     category: "oil-packing-seals",
     categoryName: "Oil & Packing Seals",
-    image: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/r.jpg",
+    image: oilSealImage,
     shortDesc: "Radial oil seals with garter spring and metal casing for retaining lubricating grease and excluding harsh industrial contaminants.",
     description: "Precision-moulded sealing lips bonded to metal reinforcement cases, equipped with stainless or spring-steel garter springs for consistent contact pressure on rotating shafts at high peripheral speeds.",
     polymerOptions: ["Nitrile (NBR)", "Polyacrylate (ACM)", "Silicone (VMQ)", "Fluoroelastomer (FKM)"],
@@ -214,7 +221,7 @@ export const products = [
     name: "Multi-Lip Chevron V-Packing Hydraulic Seals",
     category: "oil-packing-seals",
     categoryName: "Oil & Packing Seals",
-    image: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/r.jpg",
+    image: oilSealImage,
     shortDesc: "Multi-ring vee-packing sets comprising male adaptor, multiple V-rings, and female base ring for high-pressure hydraulic rams.",
     description: "Heavy-duty packing sets capable of withstanding extreme pressure spikes and severe mechanical misalignments in heavy hydraulic presses.",
     polymerOptions: ["Fabric-Reinforced Nitrile (Cotton/NBR)", "Homogeneous NBR", "FKM / PTFE"],
@@ -235,7 +242,7 @@ export const products = [
     name: "Custom Die-Cut & Moulded Industrial Rubber Gaskets",
     category: "rubber-gaskets",
     categoryName: "Industrial Rubber Gaskets",
-    image: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/s.jpg",
+    image: gasketImage,
     shortDesc: "Full face and ring type elastomeric flange gaskets conforming to ANSI B16.21, DIN, and custom bolt-circle specifications.",
     description: "Precision die-cut and hydraulic compression moulded gaskets engineered for pipe flanges, heat exchangers, fluid storage tanks, and valve bonnets. Available in continuous rolls or custom-stamped geometries with tight bolt-hole concentricity.",
     polymerOptions: ["EPDM (Potable Water & Steam)", "Neoprene (CR - Oils & Weathering)", "Nitrile (NBR - Fuel & Petroleum)", "Silicone (High Temp & Food)", "Natural Rubber (General Purpose)"],
@@ -257,7 +264,7 @@ export const products = [
     name: "High-Temperature Silicone & Viton Flange Gaskets",
     category: "rubber-gaskets",
     categoryName: "Industrial Rubber Gaskets",
-    image: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/s.jpg",
+    image: gasketImage,
     shortDesc: "Specialty food-grade silicone and chemical-grade Viton flat gaskets for ovens, autoclaves, and chemical reactors.",
     description: "Engineered for demanding thermal environments where conventional rubbers fail. Non-toxic, odorless, and resistant to aggressive acids and elevated temperatures.",
     polymerOptions: ["100% Virgin Platinum-Cured Silicone", "FKM / Viton A"],

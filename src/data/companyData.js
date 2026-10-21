@@ -3,6 +3,13 @@
  * All company details, contact channels, verified stats, and factory media paths are managed here.
  */
 
+import certificationImage from '../assets/images/cer.png';
+import factoryImage from '../assets/images/company.png';
+import mixingMillImage from '../assets/images/ar.png';
+import mouldingPackagingImage from '../assets/images/packaging.jpg';
+import testingLabImage from '../assets/images/la.png';
+import advancedLabImage from '../assets/images/un.png';
+
 export const companyData = {
   name: "Upadhyay Rubber Industry",
   shortName: "Upadhyay Rubber",
@@ -51,17 +58,17 @@ export const companyData = {
     standard: "ISO 9001:2015",
     scope: "Manufacture & Supply of Moulded Rubber, Extruded Profiles, Oil Seals, Gaskets & Precision Plastic Components",
     status: "Verified",
-    imageUrl: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/cer.png",
+    imageUrl: certificationImage,
   },
 
-  // Media assets from verified original source
+  // Local company media assets
   media: {
-    factory: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/company.png",
-    mixingMill: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/ar.png",
-    mouldingPackaging: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/packaging.jpg",
-    testingLab1: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/la.png",
-    testingLab2: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/un.png",
-    certification: "https://arunkumarsharma1.github.io/upadhyay-rubber-industry-website-/cer.png",
+    factory: factoryImage,
+    mixingMill: mixingMillImage,
+    mouldingPackaging: mouldingPackagingImage,
+    testingLab1: testingLabImage,
+    testingLab2: advancedLabImage,
+    certification: certificationImage,
   },
 
   // Company values
