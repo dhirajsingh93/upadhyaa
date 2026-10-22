@@ -143,9 +143,7 @@ export default function Footer() {
             © {new Date().getFullYear()} <strong>{companyData.name}</strong>. All rights reserved. Faridabad, Haryana, India.
           </div>
           <div className="flex items-center gap-6 font-mono text-[11px]">
-            <span>Founder: {companyData.contact.ownerName}</span>
-            <span>•</span>
-            <span>Precision Custom Moulding</span>
+            <span><a href="http://dhirajsinghp.netlify.app" target="_blank" rel="noopener noreferrer">Developed by - Dhiraj Singh</a></span>
           </div>
         </div>
       </div>
