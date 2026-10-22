@@ -1,428 +1,545 @@
-import React, { useState, useEffect } from 'react';
-import { Send, CheckCircle, AlertCircle, Upload, Paperclip, FileText, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState } from "react";
+import {
+  Send,
+  CheckCircle,
+  AlertCircle,
+  LoaderCircle,
+  X,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const initialForm = {
+  fullName: "",
+  companyName: "",
+  workEmail: "",
+  phoneNumber: "",
+  productCategory: "rubber-bush",
+  specificProduct: "",
+  estimatedQuantity: "",
+  projectDescription: "",
+  honeypot: "",
+};
+
+const categories = [
+  ["rubber-bush", "Rubber Bush & Industrial Parts"],
+  ["extruded-profiles", "Rubber Extruded Profiles"],
+  ["custom-molded", "Custom Molded Components"],
+  ["seal-o-ring-kits", "Seal & O-Ring Kits"],
+  ["oil-packing-seals", "Oil & Packing Seals"],
+  ["rubber-gaskets", "Industrial Rubber Gaskets"],
+  ["bespoke-development", "New Die / Mould Development"],
+];
+
+const inputClass =
+  "w-full min-w-0 rounded-xl border border-white/10 bg-[#111312] px-5 py-4 text-base text-white placeholder:text-white/35 outline-none transition duration-200 focus:border-[#F47735] focus:ring-1 focus:ring-[#F47735]";
 
 export default function InquiryForm({
   prefilledProduct = "",
   prefilledCategory = "",
 }) {
   const [formData, setFormData] = useState({
-    fullName: "",
-    companyName: "",
-    workEmail: "",
-    phoneNumber: "",
-    productCategory: prefilledCategory || "rubber-bush",
-    specificProduct: prefilledProduct || "",
-    estimatedQuantity: "",
-    projectDescription: "",
-    honeypot: "", // Bot prevention field
+    ...initialForm,
+    specificProduct: prefilledProduct,
+    productCategory:
+      prefilledCategory || initialForm.productCategory,
   });
 
-  const [selectedFile, setSelectedFile] = useState(null);
   const [errors, setErrors] = useState({});
-  const [status, setStatus] = useState("idle"); // idle | submitting | success | error
-  const [referenceId, setReferenceId] = useState("");
+  const [status, setStatus] = useState("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    if (prefilledProduct) {
+    if (prefilledProduct || prefilledCategory) {
       setFormData((prev) => ({
         ...prev,
-        specificProduct: prefilledProduct,
+        specificProduct: prefilledProduct || prev.specificProduct,
         productCategory: prefilledCategory || prev.productCategory,
       }));
     }
   }, [prefilledProduct, prefilledCategory]);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
+  };
+
   const validate = () => {
-    const newErrors = {};
-    if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
-    if (!formData.companyName.trim()) newErrors.companyName = "Company or entity name is required";
-    
-    if (!formData.workEmail.trim()) {
-      newErrors.workEmail = "Work email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.workEmail)) {
-      newErrors.workEmail = "Enter a valid email address (e.g. name@company.com)";
+    const nextErrors = {};
+
+    if (!formData.fullName.trim()) {
+      nextErrors.fullName = "Please enter your name.";
     }
 
-    if (!formData.phoneNumber.trim()) {
-      newErrors.phoneNumber = "Phone / WhatsApp number is required";
-    } else if (formData.phoneNumber.replace(/\D/g, '').length < 8) {
-      newErrors.phoneNumber = "Enter a valid phone number (at least 8-10 digits)";
+    if (!formData.companyName.trim()) {
+      nextErrors.companyName = "Please enter your company name.";
+    }
+
+    if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        formData.workEmail.trim()
+      )
+    ) {
+      nextErrors.workEmail = "Enter a valid email address.";
+    }
+
+    if (formData.phoneNumber.replace(/\D/g, "").length < 8) {
+      nextErrors.phoneNumber = "Enter a valid phone number.";
     }
 
     if (!formData.estimatedQuantity.trim()) {
-      newErrors.estimatedQuantity = "Estimated batch / monthly quantity is required";
+      nextErrors.estimatedQuantity =
+        "Please enter the estimated quantity.";
     }
 
     if (!formData.projectDescription.trim()) {
-      newErrors.projectDescription = "Please provide drawing details, polymer specs, or working conditions";
+      nextErrors.projectDescription =
+        "Please describe your requirements.";
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: null }));
-    }
-  };
-
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      // Limit to 15MB
-      if (file.size > 15 * 1024 * 1024) {
-        alert("File size exceeds 15MB limit. Please upload a smaller CAD or PDF document.");
-        return;
-      }
-      setSelectedFile(file);
-    }
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Honeypot spam trap check
-    if (formData.honeypot) {
-      console.warn("Spam submission blocked");
-      return;
-    }
+    // Hidden spam-trap field
+    if (formData.honeypot) return;
 
     if (!validate()) return;
 
     setStatus("submitting");
+    setErrorMessage("");
 
-    // Simulating robust client-side submission with RFQ tracking code
-    // Ready for EmailJS or backend API integration
-    setTimeout(() => {
-      const generatedId = `URI-RFQ-${Math.floor(100000 + Math.random() * 900000)}`;
-      setReferenceId(generatedId);
+    // Add your actual Web3Forms access key here
+    const accessKey = "bca31688-25e8-4383-bfa1-e9ba9d45f771";
+
+    const selectedCategory =
+      categories.find(
+        ([value]) => value === formData.productCategory
+      )?.[1] || formData.productCategory;
+
+    const subject = `Request for Quotation | ${selectedCategory} | ${formData.companyName.trim()}`;
+
+    // Complete email including project requirements
+    const message = [
+      formData.projectDescription.trim(),
+      "",
+      `Submitted on: ${new Date().toLocaleString("en-IN")}`,
+    ].join("\n");
+
+    if (!accessKey.trim()) {
+      setStatus("error");
+      setErrorMessage(
+        "Please add your Web3Forms access key in InquiryForm.jsx before submitting."
+      );
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "https://api.web3forms.com/submit",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            access_key: accessKey,
+            subject,
+            from_name: "Upadhyay Rubber Industry Website",
+            name: formData.fullName.trim(),
+            email: formData.workEmail.trim(),
+            replyto: formData.workEmail.trim(),
+            company_name: formData.companyName.trim(),
+            phone_number: formData.phoneNumber.trim(),
+            product_category: selectedCategory,
+            specific_product:
+              formData.specificProduct.trim() || "Not specified",
+            estimated_quantity: formData.estimatedQuantity.trim(),
+            message,
+            botcheck: "",
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(
+          result.message ||
+            "Unable to send your inquiry right now."
+        );
+      }
+
       setStatus("success");
-    }, 1200);
+    } catch (error) {
+      console.error("Web3Forms submission failed:", error);
+
+      setStatus("error");
+      setErrorMessage(
+        error.message ||
+          "Your inquiry could not be sent. Please try again in a moment."
+      );
+    }
   };
 
-  const handleReset = () => {
+  const resetForm = () => {
     setFormData({
-      fullName: "",
-      companyName: "",
-      workEmail: "",
-      phoneNumber: "",
-      productCategory: "rubber-bush",
-      specificProduct: "",
-      estimatedQuantity: "",
-      projectDescription: "",
-      honeypot: "",
+      ...initialForm,
+      specificProduct: prefilledProduct,
+      productCategory:
+        prefilledCategory || initialForm.productCategory,
     });
-    setSelectedFile(null);
+
     setErrors({});
     setStatus("idle");
+    setErrorMessage("");
   };
 
+  const FieldError = ({ name }) =>
+    errors[name] ? (
+      <p className="mt-1.5 text-xs text-red-400">
+        {errors[name]}
+      </p>
+    ) : null;
+
   return (
-    <div className="bg-graphite border border-graphite-border rounded-2xl p-6 sm:p-8 md:p-10 shadow-2xl relative">
+    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#252826] p-5 shadow-2xl sm:p-8 lg:p-10">
+      {/* Background glow */}
+      <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#F47735]/10 blur-3xl" />
+
       <AnimatePresence mode="wait">
         {status === "success" ? (
           <motion.div
-            key="success-card"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="text-center py-12 px-4"
+            key="success"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="relative py-12 text-center"
           >
-            <div className="w-16 h-16 rounded-full bg-emerald-500/10 border-2 border-emerald-500 flex items-center justify-center text-emerald-400 mx-auto mb-6">
-              <CheckCircle className="w-8 h-8" />
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-400/10 text-emerald-400">
+              <CheckCircle size={32} />
             </div>
 
-            <span className="font-mono text-xs uppercase tracking-widest text-industrial-orange px-3 py-1 rounded bg-charcoal border border-graphite-border">
-              RFQ Logged Successfully
-            </span>
-
-            <h3 className="font-display text-2xl sm:text-3xl font-bold text-warm-white mt-4">
-              Thank You, {formData.fullName}!
-            </h3>
-
-            <p className="mt-3 text-sm text-muted-gray max-w-lg mx-auto leading-relaxed">
-              Your technical requirement has been registered. Reference ID: <strong className="text-warm-white font-mono">{referenceId}</strong>.
-              Our technical desk at the Faridabad plant will review your specifications and contact you within 24 business hours.
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#F47735]">
+              Inquiry sent successfully
             </p>
 
-            <div className="mt-6 p-4 rounded-xl bg-charcoal border border-graphite-border max-w-md mx-auto text-left text-xs font-mono space-y-1">
-              <div className="text-muted-gray">Target Item: <span className="text-warm-white">{formData.specificProduct || formData.productCategory}</span></div>
-              <div className="text-muted-gray">Target Volume: <span className="text-warm-white">{formData.estimatedQuantity}</span></div>
-              <div className="text-muted-gray">Contact Channel: <span className="text-warm-white">{formData.phoneNumber} / {formData.workEmail}</span></div>
-            </div>
+            <h3 className="mt-4 text-2xl font-bold text-white sm:text-3xl">
+              Thank you, {formData.fullName}!
+            </h3>
 
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a
-                href={`https://wa.me/918810422099?text=Hello%20Upadhyay%20Rubber%2C%20I%20just%20submitted%20RFQ%20reference%20${referenceId}%20for%20${encodeURIComponent(formData.specificProduct || formData.productCategory)}.`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] text-white text-xs font-bold uppercase tracking-wider transition-all shadow-md shadow-[#25D366]/25"
-              >
-                <svg className="w-4 h-4 fill-white" viewBox="0 0 32 32">
-                  <path d="M16 2C8.268 2 2 8.268 2 16c0 2.68.755 5.185 2.067 7.324L2 30l6.884-2.034A13.916 13.916 0 0016 30c7.732 0 14-6.268 14-14S23.732 2 16 2zm0 25.6c-2.316 0-4.48-.65-6.326-1.78l-.454-.28-4.686 1.384 1.402-4.568-.3-.474A11.536 11.536 0 014.4 16c0-6.408 5.192-11.6 11.6-11.6s11.6 5.192 11.6 11.6-5.192 11.6-11.6 11.6zm6.368-8.694c-.348-.174-2.062-1.018-2.38-1.134-.32-.116-.552-.174-.784.174s-.9 1.134-1.104 1.366-.406.262-.754.088a9.493 9.493 0 01-2.8-1.726 10.472 10.472 0 01-1.938-2.414c-.204-.348-.022-.536.152-.71.156-.156.348-.406.522-.61.174-.204.232-.348.348-.58.116-.232.058-.436-.03-.61-.086-.174-.784-1.89-1.074-2.588-.282-.68-.57-.588-.784-.6-.204-.01-.436-.014-.668-.014s-.61.088-.93.436c-.32.348-1.22 1.192-1.22 2.91 0 1.716 1.25 3.372 1.424 3.604.174.232 2.458 3.754 5.956 5.264.832.36 1.482.574 1.988.736.836.266 1.596.228 2.198.138.67-.1 2.062-.844 2.352-1.658.29-.814.29-1.512.204-1.658-.088-.146-.32-.232-.668-.406z"/>
-                </svg>
-                <span>Instant Update via WhatsApp</span>
-              </a>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-charcoal hover:bg-graphite-light text-warm-white border border-graphite-border text-xs font-semibold uppercase tracking-wider transition-all"
-              >
-                Submit Another Requirement
-              </button>
-            </div>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-white/60">
+              Your inquiry has been submitted successfully. The
+              Upadhyay Rubber Industry team can now review your
+              requirements and respond to you.
+            </p>
+
+            <p className="mt-5 break-all text-sm text-white/80">
+              upadhyayrubber@gmail.com
+            </p>
+
+            <button
+              type="button"
+              onClick={resetForm}
+              className="mt-8 rounded-xl border border-white/10 px-6 py-3 text-sm font-semibold text-white transition hover:border-[#F47735] hover:text-[#F47735]"
+            >
+              Send another inquiry
+            </button>
           </motion.div>
         ) : (
-          <form onSubmit={handleSubmit} noValidate className="space-y-6">
-            {/* Form Header */}
-            <div className="border-b border-graphite-border pb-6">
-              <span className="font-mono text-xs uppercase tracking-widest text-industrial-orange">
-                Industrial RFQ & Custom Moulding
-              </span>
-              <h3 className="font-display text-2xl font-bold text-warm-white mt-1">
-                Request a Formal Quotation
+          <motion.form
+            key="form"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            onSubmit={handleSubmit}
+            noValidate
+            className="relative space-y-6"
+          >
+            {/* Heading */}
+            <div className="border-b border-white/10 pb-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#F47735] sm:text-sm">
+                Industrial Enquiries
+              </p>
+
+              <h3 className="mt-4 text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
+                Request a Quotation
               </h3>
-              <p className="text-xs sm:text-sm text-muted-gray mt-1">
-                Share your 2D/3D drawing, polymer requirements, or physical sample specs for direct factory pricing.
+
+              <p className="mt-3 text-sm leading-6 text-white/55 sm:text-base">
+                Tell us about your component requirements and our
+                team can get back to you.
               </p>
             </div>
 
-            {/* Honeypot Spam Prevention (Hidden from real users) */}
-            <input
-              type="text"
-              name="honeypot"
-              value={formData.honeypot}
-              onChange={handleChange}
-              tabIndex={-1}
-              autoComplete="off"
-              className="hidden"
-              aria-hidden="true"
-            />
+            {/* Hidden spam protection */}
+            <div className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden">
+              <label htmlFor="honeypot">
+                Leave this field empty
+              </label>
 
-            {/* Field Row 1: Name & Company */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <input
+                id="honeypot"
+                name="honeypot"
+                tabIndex={-1}
+                autoComplete="off"
+                value={formData.honeypot}
+                onChange={handleChange}
+              />
+            </div>
+
+            {/* Form fields */}
+            <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
+              {/* Full name */}
               <div>
-                <label htmlFor="fullName" className="block text-xs font-mono uppercase tracking-wider text-warm-white mb-2">
-                  Contact Person Name <span className="text-industrial-orange">*</span>
+                <label
+                  htmlFor="fullName"
+                  className="mb-3 block text-sm text-white/80 sm:text-base"
+                >
+                  Full name *
                 </label>
+
                 <input
                   id="fullName"
                   name="fullName"
-                  type="text"
                   value={formData.fullName}
                   onChange={handleChange}
-                  placeholder="e.g. Rajesh Sharma"
-                  className={`w-full px-4 py-3 rounded-xl bg-charcoal border text-sm text-warm-white placeholder:text-muted-gray/50 focus:outline-none transition-all ${
-                    errors.fullName ? "border-red-500 focus:ring-1 focus:ring-red-500" : "border-graphite-border focus:border-industrial-orange focus:ring-1 focus:ring-industrial-orange"
-                  }`}
+                  placeholder="Your full name"
+                  autoComplete="name"
+                  aria-invalid={!!errors.fullName}
+                  className={inputClass}
                 />
-                {errors.fullName && <p className="mt-1 text-xs text-red-400">{errors.fullName}</p>}
+
+                <FieldError name="fullName" />
               </div>
 
+              {/* Company */}
               <div>
-                <label htmlFor="companyName" className="block text-xs font-mono uppercase tracking-wider text-warm-white mb-2">
-                  Company / Entity Name <span className="text-industrial-orange">*</span>
+                <label
+                  htmlFor="companyName"
+                  className="mb-3 block text-sm text-white/80 sm:text-base"
+                >
+                  Company name *
                 </label>
+
                 <input
                   id="companyName"
                   name="companyName"
-                  type="text"
                   value={formData.companyName}
                   onChange={handleChange}
-                  placeholder="e.g. Apex Engineering Ltd."
-                  className={`w-full px-4 py-3 rounded-xl bg-charcoal border text-sm text-warm-white placeholder:text-muted-gray/50 focus:outline-none transition-all ${
-                    errors.companyName ? "border-red-500 focus:ring-1 focus:ring-red-500" : "border-graphite-border focus:border-industrial-orange focus:ring-1 focus:ring-industrial-orange"
-                  }`}
+                  placeholder="Your company"
+                  autoComplete="organization"
+                  aria-invalid={!!errors.companyName}
+                  className={inputClass}
                 />
-                {errors.companyName && <p className="mt-1 text-xs text-red-400">{errors.companyName}</p>}
-              </div>
-            </div>
 
-            {/* Field Row 2: Email & Phone */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <FieldError name="companyName" />
+              </div>
+
+              {/* Email */}
               <div>
-                <label htmlFor="workEmail" className="block text-xs font-mono uppercase tracking-wider text-warm-white mb-2">
-                  Work Email <span className="text-industrial-orange">*</span>
+                <label
+                  htmlFor="workEmail"
+                  className="mb-3 block text-sm text-white/80 sm:text-base"
+                >
+                  Email address *
                 </label>
+
                 <input
                   id="workEmail"
                   name="workEmail"
                   type="email"
                   value={formData.workEmail}
                   onChange={handleChange}
-                  placeholder="e.g. procurement@apex.com"
-                  className={`w-full px-4 py-3 rounded-xl bg-charcoal border text-sm text-warm-white placeholder:text-muted-gray/50 focus:outline-none transition-all ${
-                    errors.workEmail ? "border-red-500 focus:ring-1 focus:ring-red-500" : "border-graphite-border focus:border-industrial-orange focus:ring-1 focus:ring-industrial-orange"
-                  }`}
+                  placeholder="you@company.com"
+                  autoComplete="email"
+                  aria-invalid={!!errors.workEmail}
+                  className={inputClass}
                 />
-                {errors.workEmail && <p className="mt-1 text-xs text-red-400">{errors.workEmail}</p>}
+
+                <FieldError name="workEmail" />
               </div>
 
+              {/* Phone */}
               <div>
-                <label htmlFor="phoneNumber" className="block text-xs font-mono uppercase tracking-wider text-warm-white mb-2">
-                  Phone / WhatsApp <span className="text-industrial-orange">*</span>
+                <label
+                  htmlFor="phoneNumber"
+                  className="mb-3 block text-sm text-white/80 sm:text-base"
+                >
+                  Phone / WhatsApp *
                 </label>
+
                 <input
                   id="phoneNumber"
                   name="phoneNumber"
                   type="tel"
                   value={formData.phoneNumber}
                   onChange={handleChange}
-                  placeholder="e.g. +91 98765 43210"
-                  className={`w-full px-4 py-3 rounded-xl bg-charcoal border text-sm text-warm-white placeholder:text-muted-gray/50 focus:outline-none transition-all ${
-                    errors.phoneNumber ? "border-red-500 focus:ring-1 focus:ring-red-500" : "border-graphite-border focus:border-industrial-orange focus:ring-1 focus:ring-industrial-orange"
-                  }`}
+                  placeholder="+91 98765 43210"
+                  autoComplete="tel"
+                  aria-invalid={!!errors.phoneNumber}
+                  className={inputClass}
                 />
-                {errors.phoneNumber && <p className="mt-1 text-xs text-red-400">{errors.phoneNumber}</p>}
-              </div>
-            </div>
 
-            {/* Field Row 3: Product Category & Selected Item */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <FieldError name="phoneNumber" />
+              </div>
+
+              {/* Category */}
               <div>
-                <label htmlFor="productCategory" className="block text-xs font-mono uppercase tracking-wider text-warm-white mb-2">
-                  Product Category <span className="text-industrial-orange">*</span>
+                <label
+                  htmlFor="productCategory"
+                  className="mb-3 block text-sm text-white/80 sm:text-base"
+                >
+                  Product category *
                 </label>
+
                 <select
                   id="productCategory"
                   name="productCategory"
                   value={formData.productCategory}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl bg-charcoal border border-graphite-border text-sm text-warm-white focus:outline-none focus:border-industrial-orange transition-all"
+                  className={`${inputClass} cursor-pointer`}
                 >
-                  <option value="rubber-bush">Rubber Bush & Industrial Parts</option>
-                  <option value="extruded-profiles">Rubber Extruded Profiles</option>
-                  <option value="custom-molded">Custom Molded Components</option>
-                  <option value="seal-o-ring-kits">Seal & O-Ring Kits</option>
-                  <option value="oil-packing-seals">Oil & Packing Seals</option>
-                  <option value="rubber-gaskets">Industrial Rubber Gaskets</option>
-                  <option value="bespoke-development">New Die / Mould Development</option>
+                  {categories.map(([value, label]) => (
+                    <option
+                      key={value}
+                      value={value}
+                      className="bg-[#111312] text-white"
+                    >
+                      {label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
+              {/* Quantity */}
               <div>
-                <label htmlFor="estimatedQuantity" className="block text-xs font-mono uppercase tracking-wider text-warm-white mb-2">
-                  Estimated Quantity <span className="text-industrial-orange">*</span>
+                <label
+                  htmlFor="estimatedQuantity"
+                  className="mb-3 block text-sm text-white/80 sm:text-base"
+                >
+                  Estimated quantity *
                 </label>
+
                 <input
                   id="estimatedQuantity"
                   name="estimatedQuantity"
-                  type="text"
                   value={formData.estimatedQuantity}
                   onChange={handleChange}
-                  placeholder="e.g. 5,000 pcs / month or 500 pcs trial"
-                  className={`w-full px-4 py-3 rounded-xl bg-charcoal border text-sm text-warm-white placeholder:text-muted-gray/50 focus:outline-none transition-all ${
-                    errors.estimatedQuantity ? "border-red-500 focus:ring-1 focus:ring-red-500" : "border-graphite-border focus:border-industrial-orange focus:ring-1 focus:ring-industrial-orange"
-                  }`}
+                  placeholder="e.g. 5000 pieces/month"
+                  aria-invalid={!!errors.estimatedQuantity}
+                  className={inputClass}
                 />
-                {errors.estimatedQuantity && <p className="mt-1 text-xs text-red-400">{errors.estimatedQuantity}</p>}
+
+                <FieldError name="estimatedQuantity" />
               </div>
             </div>
 
-            {/* Specific component prefill indicator */}
+            {/* Selected product */}
             {formData.specificProduct && (
-              <div className="flex items-center justify-between p-3 rounded-xl bg-industrial-orange/10 border border-industrial-orange/30 text-xs">
-                <span className="text-warm-white">
-                  Quoting specifically for: <strong className="text-industrial-orange">{formData.specificProduct}</strong>
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-[#F47735]/30 bg-[#F47735]/10 p-3 text-sm text-white">
+                <span>
+                  Product:{" "}
+                  <strong>{formData.specificProduct}</strong>
                 </span>
+
                 <button
                   type="button"
-                  onClick={() => setFormData((p) => ({ ...p, specificProduct: "" }))}
-                  className="text-muted-gray hover:text-white"
+                  aria-label="Clear selected product"
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      specificProduct: "",
+                    }))
+                  }
+                  className="text-white/60 transition hover:text-white"
                 >
-                  <X className="w-4 h-4" />
+                  <X size={18} />
                 </button>
               </div>
             )}
 
-            {/* Field Row 4: Project Description & Specs */}
+            {/* Project requirements */}
             <div>
-              <label htmlFor="projectDescription" className="block text-xs font-mono uppercase tracking-wider text-warm-white mb-2">
-                Technical Specifications & Working Conditions <span className="text-industrial-orange">*</span>
+              <label
+                htmlFor="projectDescription"
+                className="mb-3 block text-sm text-white/80 sm:text-base"
+              >
+                Project requirements *
               </label>
+
               <textarea
                 id="projectDescription"
                 name="projectDescription"
-                rows={4}
+                rows={5}
                 value={formData.projectDescription}
                 onChange={handleChange}
-                placeholder="Mention polymer choice (NBR, EPDM, Silicone, etc.), hardness Shore A, working temperatures, chemical or oil exposure, and dimensional tolerances..."
-                className={`w-full px-4 py-3 rounded-xl bg-charcoal border text-sm text-warm-white placeholder:text-muted-gray/50 focus:outline-none transition-all resize-y ${
-                  errors.projectDescription ? "border-red-500 focus:ring-1 focus:ring-red-500" : "border-graphite-border focus:border-industrial-orange focus:ring-1 focus:ring-industrial-orange"
-                }`}
+                placeholder="Describe your product, material, dimensions, application or other requirements..."
+                aria-invalid={!!errors.projectDescription}
+                className={`${inputClass} min-h-40 resize-y`}
               />
-              {errors.projectDescription && <p className="mt-1 text-xs text-red-400">{errors.projectDescription}</p>}
+
+              <FieldError name="projectDescription" />
             </div>
 
-            {/* Optional Drawing / CAD File Upload Simulation */}
-            <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-warm-white mb-2">
-                Attach 2D/3D CAD Drawing / Technical Sheet <span className="text-muted-gray font-normal lowercase">(Optional, Max 15MB)</span>
-              </label>
-              <div className="relative border-2 border-dashed border-graphite-border hover:border-industrial-orange/50 rounded-xl p-4 bg-charcoal/50 text-center transition-colors">
-                <input
-                  type="file"
-                  id="drawingFile"
-                  onChange={handleFileChange}
-                  accept=".pdf,.dwg,.dxf,.step,.stp,.iges,.jpg,.jpeg,.png"
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                />
-                {selectedFile ? (
-                  <div className="flex items-center justify-between px-3 py-1.5 bg-graphite rounded-lg border border-graphite-border text-xs">
-                    <div className="flex items-center gap-2 truncate">
-                      <FileText className="w-4 h-4 text-industrial-orange shrink-0" />
-                      <span className="text-warm-white font-mono truncate">{selectedFile.name}</span>
-                      <span className="text-muted-gray">({(selectedFile.size / 1024).toFixed(0)} KB)</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedFile(null);
-                      }}
-                      className="text-muted-gray hover:text-white ml-2"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-2 text-muted-gray">
-                    <Upload className="w-6 h-6 text-industrial-orange/80 mb-2" />
-                    <span className="text-xs text-warm-white font-medium">Click or drag & drop CAD / PDF drawing</span>
-                    <span className="text-[11px] text-muted-gray mt-0.5">Supports PDF, STEP, DWG, DXF, PNG (Up to 15MB)</span>
-                  </div>
-                )}
-              </div>
-            </div>
+            {/* Error message */}
+            <AnimatePresence>
+              {status === "error" && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="flex gap-3 rounded-xl border border-red-400/20 bg-red-400/10 p-4 text-sm text-red-300"
+                  role="alert"
+                >
+                  <AlertCircle
+                    className="mt-0.5 shrink-0"
+                    size={18}
+                  />
 
-            {/* Submit Button */}
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={status === "submitting"}
-                className="w-full py-4 rounded-xl bg-industrial-orange hover:bg-industrial-orange-hover text-white font-bold text-sm uppercase tracking-widest transition-all shadow-xl shadow-industrial-orange/20 flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {status === "submitting" ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Processing RFQ...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Submit Request for Quotation</span>
-                    <Send className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-              <p className="text-[11px] text-muted-gray text-center mt-3">
-                Strict industrial confidentiality: your engineering drawings and specs will never be shared with third parties.
-              </p>
-            </div>
-          </form>
+                  <span>{errorMessage}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Submit button */}
+            <button
+              type="submit"
+              disabled={status === "submitting"}
+              className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#F47735] px-6 py-5 text-base font-bold text-white shadow-lg shadow-[#F47735]/15 transition duration-300 hover:bg-[#e96725] hover:shadow-[#F47735]/25 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {status === "submitting" ? (
+                <>
+                  <LoaderCircle
+                    className="animate-spin"
+                    size={20}
+                  />
+                  Sending inquiry...
+                </>
+              ) : (
+                <>
+                  Send Inquiry
+                  <Send size={20} />
+                </>
+              )}
+            </button>
+
+            <p className="text-center text-xs leading-5 text-white/40">
+              Your inquiry will be sent securely through Web3Forms.
+              No files or attachments are collected.
+            </p>
+          </motion.form>
         )}
       </AnimatePresence>
     </div>
